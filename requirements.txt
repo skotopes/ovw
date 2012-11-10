@@ -1,0 +1,9 @@
+Flask==0.8
+Flask-WTF==0.6
+Jinja2==2.6
+WTForms==1.0.1
+Werkzeug==0.8.3
+wsgiref==0.1.2
+flup==1.0.3.dev-20110405
+python-daemon==1.6
+Fabric==1.5.0

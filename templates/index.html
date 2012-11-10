@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block content %}
+<div class="hero-unit">
+		<p>
+			<h4>В случае непредвиденной ситуации вытянуть шнур выдавить стекло:</h4>
+			<br/>
+			Несколько вещей которые не надо делать:<br/>
+			<ul>
+				<li>Отзывать сертификат сервера.</li>
+				<li>Выписывать пользователю сертификат с расширениями для сервера.</li>
+			</ul>
+		</p>
+</div>
+
+<div class="page-header">
+	<h1>Certificates list</h1>
+</div>
+<div class="row">
+	<div class="span12">
+		{% if keylist == None %}
+		<p>
+			<h2>Keystore not exists. <a href="{{ url_for('initialize') }}">Initialize?</a></h2>
+		</p>
+		{% else %}
+		<p>
+			<a href="{{ url_for('generate') }}">Generate new certificate</a>
+		</p>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+				<tr>
+					<th style="width:40px;">Serial</th>
+					<th style="width:40px;">State</th>
+					<th style="width:100px;">Name</th>
+					<th style="width:80px;">Issued</th>
+					<th style="width:80px;">Revoked</th>
+					<th>Identity</th>
+					<th style="width:110px;">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for k in keylist %}
+				<tr>
+					<td>{{ k.serial }}</td>
+					<td>{{ k.state }}</td>
+					<td>{{ k.name }}</td>
+					<td>{{ k.issued }}</td>
+					<td>{{ k.revoked }}</td>
+					<td>{{ k.identity }}</td>
+					<td>
+						{% if k.state != 'R' %}
+						<a href="{{ url_for('revoke',name=k.name) }}">Revoke</a>,
+						<a href="{{ url_for('download',name=k.name) }}">Download</a>
+						{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
+	</div>
+</div>
+
+{% endblock %}

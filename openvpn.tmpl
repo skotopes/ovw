@@ -1,0 +1,18 @@
+{% for s in servers %}
+remote {{ s }} 1194
+{% endfor %}
+client
+nobind
+dev tun
+proto tcp
+pull
+resolv-retry infinite
+persist-key
+persist-tun
+
+ca ca.crt
+cert {{ name }}.crt
+key {{ name }}.key
+
+comp-lzo
+verb 4

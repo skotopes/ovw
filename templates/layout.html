@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <title>OpenVPN :: {% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="White-label ltd">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+    <style type="text/css">
+        body {
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+        .center { text-align: center; }
+    </style>
+    {% block style %}{% endblock %}
+    <script src="/static/js/jquery-1.7.2.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    {% block script %}{% endblock %}
+    </head>
+    <body>
+        <div class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="brand" href="{{ url_for('index') }}"><strong>Open</strong>&thinsp;VPN</a>
+                    <div class="btn-group pull-right">
+                        {% if g.user %}
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="icon-user"></i> {{ g.user }}
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('logout') }}"><i class="icon-off"></i> Sign Out</a></li>
+                        </ul>
+                        {% else %}
+                        <a class="btn" href="{{ url_for('login') }}">
+                            <i class="icon-user"></i> Login
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <a class="close" data-dismiss="alert" href="#">×</a>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+            <hr>
+            
+            <footer>
+                <div class="center">White-label ltd &copy;</div>
+            </footer>
+        </div>
+    </body>
+</html>

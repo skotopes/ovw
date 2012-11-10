@@ -1,0 +1,59 @@
+{% macro render_field(field) %}
+    <div class="control-group {% if field.errors %} error{% endif %}">
+        {% if field.type not in ('HiddenField','CSRFTokenField') %}
+            {{ field.label }}
+        {% endif %}
+        <div class="input">
+            {{ field(**kwargs)|safe }}
+            {% if field.errors %}
+            <span class="help-inline">
+                {% for error in field.errors %}
+                    {{ error }}{% if not loop.last %},{% endif %}
+                {% endfor %}</span>
+            {% endif %}
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro render_form(form, controller, title) %}
+<form class="well" method="post" {% if controller %}action="{{ url_for(controller) }}"{% endif %}>
+    <fieldset>
+        {% if title %}
+        <legend>{{ title }}</legend>
+        {% endif %}
+        {% for field, c in form._unbound_fields %}
+            {{ render_field(form[field]) }}
+        {% endfor %}
+        <div class="actions">
+            <input type="submit" class="btn btn-primary">&nbsp;
+            <button type="reset" class="btn">Cancel</button>
+        </div>
+    </fieldset>
+</form>
+{% endmacro %}
+
+{% macro render_field_inline(field) %}
+<span class="control-group {% if field.errors %} error{% endif %}">
+    {% if field.type not in ('HiddenField','CSRFTokenField') %}
+        {{ field.label }}
+    {% endif %}
+    <span class="input">
+        {{ field(**kwargs)|safe }}
+        {% if field.errors %}
+        <span class="help-inline">
+            {% for error in field.errors %}
+                {{ error }}{% if not loop.last %},{% endif %}
+            {% endfor %}</span>
+        {% endif %}
+    </span>
+</span>
+{% endmacro %}
+
+{% macro render_form_inline(form, controller, title) %}
+<form class="form-inline" method="post" {% if controller %}action="{{ url_for(controller) }}"{% endif %}>
+    {% for field, c in form._unbound_fields %}
+        {{ render_field_inline(form[field]) }}
+    {% endfor %}
+    <input type="submit" class="btn btn-primary">
+</form>
+{% endmacro %}
