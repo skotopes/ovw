@@ -6,6 +6,8 @@ from fabric.contrib.files import *
 from fabric.api import *
 
 def sync_file(src, dst, hosts):
+	if len(hosts) == 0:
+		return True
 	try:
 		for i in state.output:
 			state.output[i] = False

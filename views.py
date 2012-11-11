@@ -2,8 +2,9 @@ from application import *
 from forms import *
 from jinja2 import Template
 
-from os import path, mkdir
-from shutil import rmtree, copy, make_archive
+from os import path, mkdir, listdir
+from shutil import rmtree, copy
+from zipfile import ZipFile, ZIP_DEFLATED
 
 import config, hashlib
 
@@ -71,6 +72,17 @@ def revoke(name):
 		flash('Crl not synced, check logs' ,'error')
 	return redirect('/')
 
+def recursive_zip(zipf, base, ptr=None):
+	if not ptr:
+		ptr = base
+	nodes = listdir(ptr)
+	for item in nodes:
+		item = path.join(ptr, item)
+		if path.isfile(item):
+			zipf.write(item, path.relpath(item, base))
+		elif path.isdir(item):
+			recursive_zip(zipf, base, item)
+
 @app.route("/download/<string:name>")
 @require_login
 def download(name):
@@ -84,8 +96,10 @@ def download(name):
 	
 	t = Template(open("openvpn.tmpl").read())
 	f = open(path.join(kd, "openvpn.conf"), "w")
-	f.write(t.render(name=name, servers=config.APP_VPN_SERVERS))
+	f.write(t.render(name=name, servers=config.APP_VPN_TMPL_SERVERS))
 	f.close()
 	
-	make_archive(kd, 'zip', kd)
+	z = ZipFile(path.join(config.APP_TMPDIR, '%s.zip' % name), mode='w')
+	recursive_zip(z, kd)
+	z.close()
 	return send_from_directory(config.APP_TMPDIR, '%s.zip' % name, as_attachment=True)
