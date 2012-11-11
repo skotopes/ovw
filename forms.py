@@ -3,7 +3,7 @@ import re
 
 name_validators = [
 	validators.Required(),
-	validators.Regexp(r'[a-zA-Z0-9]{5,25}', re.IGNORECASE, "Require to be [a-zA-Z0-9]{5,25}")
+	validators.Regexp(r'[a-zA-Z0-9]{3,25}', re.IGNORECASE, "Require to be [a-zA-Z0-9]{3,25}")
 ]
 
 class UserLoginForm(Form):
