@@ -10,7 +10,7 @@ import config, hashlib
 
 from remote import *
 from easyRSA import *
-e = EasyRSA(config.APP_KEYDIR)
+e = EasyRSA(config.APP_KEY_DIR, config.APP_KEY_ENV)
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():

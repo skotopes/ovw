@@ -14,7 +14,7 @@ class EasyCert(object):
 				continue
 			k,v = i.split('=')
 			self.identity[k] = v.strip()
-		self.name 		= self.identity['name']
+		self.name 		= self.identity['CN']
 
 	def getProperty(self, p):
 		return self.identity[p]
@@ -33,12 +33,13 @@ class EasyRSA(object):
 	print e.listCerts()
 	e.revokeKey("client1")
 	"""
-	def __init__(self, dir):
+	def __init__(self, dir, env = {}):
 		dir = path.abspath(dir)
 		# global env
 		self.env = {
 			"KEY_DIR"				: dir,
 			"KEY_SIZE"				: "1024",
+			"KEY_DAYS"				: "3650",
 			"KEY_COUNTRY"			: "US",
 			"KEY_PROVINCE"			: "CA",
 			"KEY_CITY"				: "SanFrancisco",
@@ -48,6 +49,7 @@ class EasyRSA(object):
 			"PKCS11_MODULE_PATH"	: "dummy",
 			"PKCS11_PIN"			: "dummy"
 		}
+		self.env.update(env)
 		
 		self.key_dir		= dir;
 		self.key_index		= path.join(dir, 'index.txt')
@@ -79,7 +81,7 @@ class EasyRSA(object):
 		if path.exists(self.file_dh):
 			print "DH already exists:", self.file_dh
 		else:
-			args = [ "openssl", "dhparam", "-out", self.file_dh, "1024" ]
+			args = [ "openssl", "dhparam", "-out", self.file_dh, self.env["KEY_SIZE"] ]
 			self._exec(args)
 	
 	def buildCA(self):
@@ -89,8 +91,8 @@ class EasyRSA(object):
 			print "CA already exists:", self.file_ca_crt, self.file_ca_key
 		else:
 			args = [ "openssl", "req", 
-				"-batch", "-days", "3650", "-nodes", "-new", 
-				"-newkey", "rsa:1024", 
+				"-batch", "-days", self.env["KEY_DAYS"], "-nodes", "-new", 
+				"-newkey", "rsa:%s" % self.env["KEY_SIZE"], 
 				"-sha1", "-x509", 
 				"-keyout", self.file_ca_key, 
 				"-out", self.file_ca_crt, 
@@ -114,8 +116,8 @@ class EasyRSA(object):
 				extensions += [ "-extensions", "server" ]
 			# gen keys
 			args = [ "openssl", "req", 
-				"-batch", "-days", "3650", "-nodes", "-new", 
-				"-newkey", "rsa:1024", 
+				"-batch", "-days", self.env["KEY_DAYS"], "-nodes", "-new", 
+				"-newkey", "rsa:%s" % self.env["KEY_SIZE"], 
 				"-keyout", key, 
 				"-out", csr, 
 				"-config", self.file_openssl
@@ -123,7 +125,7 @@ class EasyRSA(object):
 			self._exec(args + extensions)
 			# sign
 			args = [ "openssl", "ca", 
-				"-batch", "-days", "3650", 
+				"-batch", "-days", self.env["KEY_DAYS"], 
 				"-out", crt, 
 				"-in", csr, 
 				"-md", "sha1", 

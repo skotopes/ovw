@@ -11,14 +11,27 @@ APP_USERS		= {
 # Disable debug to enable session store encryption
 APP_DEBUG		= True
 # directory where CA will store database and keys
-APP_KEYDIR		= 'keys'
+APP_KEY_DIR		= 'keys'
+# environment for key generation, use only strings
+APP_KEY_ENV	= {
+	"KEY_SIZE"				: "1024",
+	"KEY_DAYS"				: "3650",
+	"KEY_COUNTRY"			: "US",
+	"KEY_PROVINCE"			: "CA",
+	"KEY_CITY"				: "SanFrancisco",
+	"KEY_ORG"				: "Fort-Funston",
+	"KEY_EMAIL"				: "me@myhost.mydomain",
+	"KEY_OU"				: "openvpn",
+	"PKCS11_MODULE_PATH"	: "dummy",
+	"PKCS11_PIN"			: "dummy"
+}
+
 # temp storage for cert packs
 APP_TMPDIR		= 'tmp'
 # vpn server host where we want to sync crl. Use empty list to disable sync
 APP_VPN_SERVERS	= [ '127.0.0.1' ]
 # path where crl should be placed
 APP_VPN_CRL		= "/etc/openvpn/crl.pem"
-
 # this host will be shown in client openvpn.conf
 APP_VPN_TMPL_SERVERS = [ 'vpn.mycompany.ru' ]
 
