@@ -58,7 +58,7 @@ def generate():
 	f = CertificateForm(request.form)
 	if request.method == 'POST' and f.validate():
 		e.buildKey(f.name.data, f.server.data)
-		if not sync_file(e.file_crl, config.APP_VPN_CRL, config.APP_VPN_SERVERS):
+		if not sync_file(e.file_crl, config.APP_VPN_CRL, config.APP_VPN_SERVERS, config.APP_VPN_SERVERS_USER):
 			flash('Crl not synced, check logs' ,'error')
 		return redirect('/')
 	return render_template('form.html', form=f, title="Generate certificate")
@@ -94,7 +94,7 @@ def download(name):
 		copy(i, path.join(kd, path.split(i)[1]))
 	
 	t = Template(open("openvpn.tmpl").read())
-	f = open(path.join(kd, "openvpn.conf"), "w")
+	f = open(path.join(kd, "openvpn.ovpn"), "w")
 	f.write(t.render(name=name, servers=config.APP_VPN_TMPL_SERVERS))
 	f.close()
 	

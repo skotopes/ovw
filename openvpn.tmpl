@@ -1,6 +1,6 @@
-{% for s in servers %}
+{% for s in servers -%}
 remote {{ s }} 1194
-{% endfor %}
+{%- endfor %}
 client
 nobind
 dev tun
@@ -9,10 +9,8 @@ pull
 resolv-retry infinite
 persist-key
 persist-tun
-
 ca ca.crt
 cert {{ name }}.crt
 key {{ name }}.key
-
 comp-lzo
 verb 4

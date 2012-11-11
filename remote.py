@@ -5,7 +5,7 @@ from fabric import state
 from fabric.contrib.files import *
 from fabric.api import *
 
-def sync_file(src, dst, hosts):
+def sync_file(src, dst, hosts, user):
 	if len(hosts) == 0:
 		return True
 	try:
@@ -14,7 +14,7 @@ def sync_file(src, dst, hosts):
 		state.env.abort_on_prompts = True
 		state.output.aborts = True
 		state.env.parallel = False
-		state.env.user = "root"
+		state.env.user = user
 		
 		execute(_sync_file, src, dst, hosts=hosts)
 	except:

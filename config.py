@@ -30,6 +30,8 @@ APP_KEY_ENV	= {
 APP_TMPDIR		= 'tmp'
 # vpn server host where we want to sync crl. Use empty list to disable sync
 APP_VPN_SERVERS	= [ '127.0.0.1' ]
+# username for connection
+APP_VPN_SERVERS_USER = 'openvpn'
 # path where crl should be placed
 APP_VPN_CRL		= "/etc/openvpn/crl.pem"
 # this host will be shown in client openvpn.conf
