@@ -5,7 +5,7 @@ from jinja2 import Template
 from os import path, mkdir
 from shutil import rmtree, copy, make_archive
 
-import config
+import config, hashlib
 
 from remote import *
 from easyRSA import *
@@ -15,11 +15,12 @@ e = EasyRSA(config.APP_KEYDIR)
 def login():
 	f = UserLoginForm(request.form)
 	if request.method == 'POST' and f.validate():
-		if config.APP_USERS.has_key(f.name.data) and config.APP_USERS[f.name.data] == f.password.data:
+		phash = hashlib.sha256(f.password.data).hexdigest()
+		if config.APP_USERS.has_key(f.name.data) and config.APP_USERS[f.name.data] == phash:
 			if f.remember.data:
 				session.permanent = True
 			session['u'] = f.name.data
-			session['p'] = f.password.data
+			session['p'] = phash
 			g.user = f.name.data
 			flash('Hi %s, Nice to see you again!' % g.user,'success')
 			# insure that we do not redirect user outside.
