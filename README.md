@@ -21,6 +21,10 @@ What it can do:
 - Start FastCGI daemon: ./manage.py StartFCGI
 - Install nginx(or other fastcgi capable server) and use fcgi.sock for application upstream.
 
+# CRL Syncronization
+
+Use ssh keys if you need it. Or disable it in your local configuration file.
+
 # Example configuration for nginx
 
 		server {

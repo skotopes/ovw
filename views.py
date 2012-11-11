@@ -49,7 +49,6 @@ def index():
 @require_login
 def initialize():
 	e.initInfrastructure()
-	e.buildDH()
 	e.buildCA()
 	return redirect('/')
 

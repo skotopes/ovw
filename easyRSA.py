@@ -37,7 +37,7 @@ class EasyRSA(object):
 		dir = path.abspath(dir)
 		# global env
 		self.env = {
-			"KEY_DIR"				: path.join(dir, 'keys'),
+			"KEY_DIR"				: dir,
 			"KEY_SIZE"				: "1024",
 			"KEY_COUNTRY"			: "US",
 			"KEY_PROVINCE"			: "CA",
@@ -49,15 +49,14 @@ class EasyRSA(object):
 			"PKCS11_PIN"			: "dummy"
 		}
 		
-		self.base_dir		= dir;
-		self.key_dir		= path.join(dir, 'keys')
-		self.key_index		= path.join(dir, 'keys', 'index.txt')
-		self.key_serial		= path.join(dir, 'keys', 'serial')
-
-		self.file_dh		= path.join(dir, 'keys', 'dh1024.pem')
-		self.file_ca_crt	= path.join(dir, 'keys', 'ca.crt')
-		self.file_ca_key	= path.join(dir, 'keys', 'ca.key')
-		self.file_crl		= path.join(dir, 'keys', 'crl.pem')
+		self.key_dir		= dir;
+		self.key_index		= path.join(dir, 'index.txt')
+		self.key_serial		= path.join(dir, 'serial')
+                                             
+		self.file_dh		= path.join(dir, 'dh1024.pem')
+		self.file_ca_crt	= path.join(dir, 'ca.crt')
+		self.file_ca_key	= path.join(dir, 'ca.key')
+		self.file_crl		= path.join(dir, 'crl.pem')
 		self.file_openssl	= path.join(path.abspath(path.dirname(__file__)), 'openssl.cnf')
 		
 	def _exec(self, args):
@@ -69,8 +68,7 @@ class EasyRSA(object):
 		return stdout
 	
 	def initInfrastructure(self):
-		if not path.exists(self.base_dir):
-			mkdir(self.base_dir)
+		if not path.exists(self.key_dir):
 			mkdir(self.key_dir)
 			open(self.key_index, "w").close()
 			f = open(self.key_serial, "w")
