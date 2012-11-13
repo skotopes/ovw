@@ -8,7 +8,6 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 import config, hashlib
 
-from remote import *
 from easyRSA import *
 e = EasyRSA(config.APP_KEY_DIR, config.APP_KEY_ENV)
 
@@ -58,8 +57,6 @@ def generate():
 	f = CertificateForm(request.form)
 	if request.method == 'POST' and f.validate():
 		e.buildKey(f.name.data, f.server.data)
-		if not sync_file(e.file_crl, config.APP_VPN_CRL, config.APP_VPN_SERVERS, config.APP_VPN_SERVERS_USER):
-			flash('Crl not synced, check logs' ,'error')
 		return redirect('/')
 	return render_template('form.html', form=f, title="Generate certificate")
 	
@@ -67,8 +64,12 @@ def generate():
 @require_login
 def revoke(name):
 	e.revokeKey(name)
-	if not sync_file(e.file_crl, config.APP_VPN_CRL, config.APP_VPN_SERVERS):
+	# TODO: bug in Crypto - initialization should be prformed from worker thread
+	from remote import sync_file
+	if not sync_file(e.file_crl, config.APP_VPN_CRL, config.APP_VPN_SERVERS, config.APP_VPN_SERVERS_USER):
 		flash('Crl not synced, check logs' ,'error')
+	else:
+		flash('Crl synced, certificate revoked' ,'success')
 	return redirect('/')
 
 def recursive_zip(zipf, base, ptr=None):

@@ -3,9 +3,9 @@
 from optparse import OptionParser
 from application import app
 from os import environ
-from views import *
 
 import config
+import views
 
 class Main(object):
 	def __init__(self):
@@ -41,6 +41,7 @@ class Main(object):
 			pidfile=FileLock('/tmp/wl-fcgi'),
 		)
 		ctx.stderr = open('error.log', 'w+')
+		ctx.stdout = ctx.stderr
 		with ctx:
 			open('wl-fcgi.pid', 'w').write(str(getpid()))
 			WSGIServer(app, bindAddress='fcgi.sock', umask=0000).run()

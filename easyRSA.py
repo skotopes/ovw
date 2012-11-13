@@ -166,7 +166,7 @@ class EasyRSA(object):
 			self._exec(args)
 			self.updateCRL()
 		else:
-			print "Cert already exists:", self.file_ca_crt, self.file_ca_key
+			print "Cert not exists:", self.file_ca_crt, self.file_ca_key
 
 	def listCerts(self):
 		if not path.exists(self.key_index):
