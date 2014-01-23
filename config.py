@@ -35,7 +35,7 @@ APP_VPN_SERVERS_USER = 'openvpn'
 # path where crl should be placed
 APP_VPN_CRL		= "/etc/openvpn/crl.pem"
 # this host will be shown in client openvpn.conf
-APP_VPN_TMPL_SERVERS = [ 'vpn.mycompany.ru' ]
+APP_VPN_TMPL_SERVERS = [ 'vpn.mycompany.com' ]
 
 # your configuration can override some part of mine ;-)
 if path.isfile('config_local.py'):

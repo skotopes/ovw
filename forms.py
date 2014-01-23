@@ -1,4 +1,5 @@
-from flaskext.wtf import Form, TextField, Required, BooleanField, PasswordField, HiddenField, SelectMultipleField, validators
+from flask_wtf import Form
+from wtforms import Form, TextField, BooleanField, PasswordField, HiddenField, SelectMultipleField, validators
 import re
 
 name_validators = [
@@ -8,9 +9,9 @@ name_validators = [
 
 class UserLoginForm(Form):
 	name		= TextField('Name', name_validators)
-	password	= PasswordField('Password', [ validators.Required() ])
+	password	= PasswordField('Password', [ validators.DataRequired() ])
 	remember	= BooleanField('Remember for 1 month')
-	next		= HiddenField('next', [ validators.Required() ], default="/")
+	next		= HiddenField('next', [ validators.DataRequired() ], default="/")
 
 class CertificateForm(Form):
 	name		= TextField('Name', name_validators)
