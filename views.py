@@ -1,22 +1,49 @@
-from application import *
+from ovw import *
 from forms import *
 from jinja2 import Template
 
-from os import path, mkdir, listdir
+from os import path, mkdir, listdir, unlink
 from shutil import rmtree, copy
 from zipfile import ZipFile, ZIP_DEFLATED
+from functools import wraps
 
-import config, hashlib
+import hashlib
 
 from easyRSA import *
-e = EasyRSA(config.APP_KEY_DIR, config.APP_KEY_ENV)
+e = EasyRSA(app.config['KEY_DIR'], app.config['KEY_ENV'])
+
+@app.before_request
+def before_request():
+	if session.has_key('u') and session.has_key('p'):
+		if app.config['USERS'].has_key(session['u']) and app.config['USERS'][session['u']] == session['p']:
+			g.user = session['u']
+		else:
+			g.user = None
+	else:
+		g.user = None
+
+def require_login(f):
+	@wraps(f)
+	def decorated_function(*args, **kwargs):
+		if g.user is None:
+			return redirect(url_for('login', next=request.url))
+		return f(*args, **kwargs)
+	return decorated_function
+
+@app.errorhandler(404)
+def page_not_found(error):
+	return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def page_not_found(error):
+	return render_template('500.html'), 500
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
 	f = UserLoginForm(request.form)
 	if request.method == 'POST' and f.validate():
 		phash = hashlib.sha256(f.password.data).hexdigest()
-		if config.APP_USERS.has_key(f.name.data) and config.APP_USERS[f.name.data] == phash:
+		if app.config['USERS'].has_key(f.name.data) and app.config['USERS'][f.name.data] == phash:
 			if f.remember.data:
 				session.permanent = True
 			session['u'] = f.name.data
@@ -49,6 +76,8 @@ def index():
 def initialize():
 	e.initInfrastructure()
 	e.buildCA()
+	e.buildDH()
+	e.buildKey("server", server=True)
 	return redirect('/')
 
 @app.route("/generate", methods=['GET', 'POST'])
@@ -56,7 +85,7 @@ def initialize():
 def generate():
 	f = CertificateForm(request.form)
 	if request.method == 'POST' and f.validate():
-		e.buildKey(f.name.data, f.server.data)
+		e.buildKey(f.name.data, password=f.password.data)
 		return redirect('/')
 	return render_template('form.html', form=f, title="Generate certificate")
 	
@@ -66,7 +95,7 @@ def revoke(name):
 	e.revokeKey(name)
 	# TODO: bug in Crypto - initialization should be prformed from worker thread
 	from remote import sync_file
-	if not sync_file(e.file_crl, config.APP_VPN_CRL, config.APP_VPN_SERVERS, config.APP_VPN_SERVERS_USER):
+	if not sync_file(e.file_crl, app.config['VPN_CRL'], app.config['VPN_SERVERS'], app.config['VPN_SERVERS_USER']):
 		flash('Crl not synced, check logs' ,'error')
 	else:
 		flash('Crl synced, certificate revoked' ,'success')
@@ -86,20 +115,29 @@ def recursive_zip(zipf, base, ptr=None):
 @app.route("/download/<string:name>")
 @require_login
 def download(name):
+	archive_name = '%s.zip' % name
+	
 	l = e.listKeySet(name)
-	kd = path.join(config.APP_TMPDIR, name)
+	kd = path.join(app.config['TMP_DIR'], name)
 	if path.exists(kd):
 		rmtree(kd)
 	mkdir(kd)
 	for i in l:
 		copy(i, path.join(kd, path.split(i)[1]))
 	
-	t = Template(open("openvpn.tmpl").read())
+	t = Template(open(asset("openvpn.tmpl"), "r").read())
 	f = open(path.join(kd, "openvpn.ovpn"), "w")
-	f.write(t.render(name=name, servers=config.APP_VPN_TMPL_SERVERS))
+	f.write(t.render(name=name, servers=app.config['VPN_TMPL_SERVERS']))
 	f.close()
 	
-	z = ZipFile(path.join(config.APP_TMPDIR, '%s.zip' % name), mode='w')
+	z = ZipFile(path.join(app.config['TMP_DIR'], archive_name), mode='w')
 	recursive_zip(z, kd)
 	z.close()
-	return send_from_directory(config.APP_TMPDIR, '%s.zip' % name, as_attachment=True)
+	
+	@after_this_request
+	def add_header(response):
+		rmtree(kd)
+		unlink(path.join(app.config['TMP_DIR'], archive_name))
+		return response
+	
+	return send_from_directory(app.config['TMP_DIR'], archive_name, as_attachment=True)
